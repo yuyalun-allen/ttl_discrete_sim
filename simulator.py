@@ -3,12 +3,13 @@ from flight import Flight
 
 
 class AirlineRmSimulation:
-    def __init__(self, routes):
+    def __init__(self, routes, log):
         self.env = simpy.Environment()
         self.routes = routes
         self.flights = {}
+        self.log = log
         for origin, destination in routes:
-            self.flights[(origin, destination)] = Flight(self.env, flight_id=(origin, destination))
+            self.flights[(origin, destination)] = Flight(self.env, flight_id=(origin, destination), log=self.log)
 
     def run(self, num_days):
         for flight in self.flights.values():
@@ -24,11 +25,4 @@ class AirlineRmSimulation:
             print(f"Total revenue: ${flight.total_revenue:.2f}")
             print(f"Total seats sold: {flight.bookings}")
             print()
-
-
-
-
-
-
-
 

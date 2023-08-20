@@ -4,7 +4,7 @@ import simpy
 
 
 class Flight:
-    def __init__(self, env, flight_id):
+    def __init__(self, env, flight_id, log):
         self.env = env
         self.id = flight_id
         self.bookings = 0
@@ -13,6 +13,7 @@ class Flight:
         self.norm_price = 100
         self.ticket_price = self.norm_price
         self.total_revenue = 0
+        self.log = log
     
 
     # Define the revenue management function for each flight
@@ -42,28 +43,32 @@ class Flight:
                 new_price = 0  # no more bookings allowed
             self.ticket_price = new_price
             # update the ticket price
-            print(f"Day {self.env.now} {self.id} ticket price: {self.ticket_price:.2f}, "
-                  f"remaining {self.num_seats - self.bookings} seats.")
+            if self.log == "DEBUG":
+                print(f"Day {self.env.now} {self.id} ticket price: {self.ticket_price:.2f}, "
+                    f"remaining {self.num_seats - self.bookings} seats.")
 
     # Define the function to simulate passenger bookings
     def passenger_arrivals(self):
         while True:
             yield self.env.timeout(int(np.random.exponential(scale=Param.pax_inter_time)))
-            print(f"Passenger of flight {self.id} arrived at day {self.env.now} ")
+            if self.log == "DEBUG":
+                print(f"Passenger of flight {self.id} arrived at day {self.env.now} ")
             if self.bookings < self.num_seats:
                 self.bookings += 1
                 self.total_revenue += self.ticket_price
-                print(f"Passenger of flight {self.id} "
-                      f"arrived at day {self.env.now} "
-                      f"purchased a ticket at price {self.ticket_price:.2f}, "
-                      f"remaining {self.num_seats - self.bookings} seats.")
+                if self.log == "DEBUG":
+                    print(f"Passenger of flight {self.id} "
+                        f"arrived at day {self.env.now} "
+                        f"purchased a ticket at price {self.ticket_price:.2f}, "
+                        f"remaining {self.num_seats - self.bookings} seats.")
                 # Start TTL timing
                 start = self.env.now
                 ttl = self.env.process(self.ticket_time_limit())
                 # Allow decision
                 self.env.process(self.decide_booking(ttl))
             else:
-                print(f"Passenger of flight {self.id} arrived at day {self.env.now} finds no available seats.")
+                if self.log == "DEBUG":
+                    print(f"Passenger of flight {self.id} arrived at day {self.env.now} finds no available seats.")
 
     # Handle ttl
     def ticket_time_limit(self):
@@ -72,10 +77,11 @@ class Flight:
             self.bookings -= 1
             # TODO: price may change.
             self.total_revenue -= self.ticket_price
-            print(f"Passenger of flight {self.id} "
-                f"automatically cancelled at day {self.env.now} "
-                f"return a ticket at price {self.ticket_price:.2f}, "
-                f"remaining {self.num_seats - self.bookings} seats.")
+            if self.log == "DEBUG":
+                print(f"Passenger of flight {self.id} "
+                    f"automatically cancelled at day {self.env.now} "
+                    f"return a ticket at price {self.ticket_price:.2f}, "
+                    f"remaining {self.num_seats - self.bookings} seats.")
         except simpy.Interrupt as interrupt:
             cause = interrupt.cause
             if cause == "cancel":
@@ -86,18 +92,27 @@ class Flight:
                     f"return a ticket at price {self.ticket_price:.2f}, "
                     f"remaining {self.num_seats - self.bookings} seats.")
             elif cause == "confirm":
-                print(f"Passenger of flight {self.id} "
-                    f"confirmed at day {self.env.now} ")
+                if self.log == "DEBUG":
+                    print(f"Passenger of flight {self.id} "
+                        f"confirmed at day {self.env.now} ")
     
     # Make decision
     def decide_booking(self, ttl):
         interrupted = False
-        while ttl.is_alive and not interrupted:
+        timeout = False
+        while not timeout and not interrupted:
+            print(Param.ticket_time_limit)
             yield self.env.timeout(Param.decision_inter_time)
             decision = np.random.random() 
             if decision <= Param.confirm_prob:
-                ttl.interrupt(cause="cancel")
-                interrupted = True
+                try:
+                    ttl.interrupt(cause="cancel")
+                    interrupted = True
+                except RuntimeError:
+                    timeout = True
             elif decision > Param.confirm_prob and decision <= Param.confirm_prob + Param.cancel_prob:
-                ttl.interrupt(cause="confirm")
-                interrupted = True
+                try:
+                    ttl.interrupt(cause="confirm")
+                    interrupted = True
+                except RuntimeError:
+                    timeout = True
