@@ -70,6 +70,7 @@ class Flight:
         try:
             yield self.env.timeout(Param.ticket_time_limit)
             self.bookings -= 1
+            # TODO: price may change.
             self.total_revenue -= self.ticket_price
             print(f"Passenger of flight {self.id} "
                 f"automatically cancelled at day {self.env.now} "
