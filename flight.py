@@ -101,7 +101,6 @@ class Flight:
         interrupted = False
         timeout = False
         while not timeout and not interrupted:
-            print(Param.ticket_time_limit)
             yield self.env.timeout(Param.decision_inter_time)
             decision = np.random.random() 
             if decision <= Param.confirm_prob:
