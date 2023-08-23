@@ -13,7 +13,7 @@ class AirlineRmPlotting:
             simulation.run(num_days=Param.num_days)
             revenue = 0
             for f in simulation.flights.values():
-                revenue += f.total_revenue
+                revenue += f.revenue
                 revenues.append(revenue)
         
         plt.plot(range(1,max_ttl), revenues, color='blue', label=Param.confirm_prob)
