@@ -2,23 +2,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 from parameters import Parameter as Param
 from simulator import  AirlineRmSimulation as Sim
+from scipy.interpolate import make_interp_spline
 
 class AirlineRmPlotting:
     def plot_ttl_revenue(routes):
-        revenues = list()
-        max_ttl = 60
-        for i in range(1, max_ttl):
-            Param.ticket_time_limit = i
-            simulation = Sim(routes, "INFO")
-            simulation.run(num_days=Param.num_days)
-            revenue = 0
-            for f in simulation.flights.values():
-                revenue += f.revenue
-                revenues.append(revenue)
-        
-        plt.plot(range(1,max_ttl), revenues, color='blue', label=Param.confirm_prob)
-        plt.xlabel("ticket_time_limit")
-        plt.ylabel("revenue")
+        confirm_prob_range = [0, 0.2, 0.4, 0.6]
+        confirm_prob_color = ["black", "red", "blue", "yellow"]
+        for index in range(len(confirm_prob_color)):
+            Param.confirm_prob = confirm_prob_range[index]
+            revenues = list()
+            for i in np.arange(1, 60.5, 0.5):
+                Param.ticket_time_limit = i
+                simulation = Sim(routes, "INFO")
+                simulation.run(num_days=Param.num_days)
+                revenue = 0
+                for f in simulation.flights.values():
+                    revenue += f.revenue
+                    revenues.append(revenue)
+            
+            spl = make_interp_spline(np.arange(1, 60.5, 0.5), revenues, k=3)
+            x_smooth = np.linspace(1, 60, 300)
+            y_smooth = spl(x_smooth)
+            
+            plt.plot(x_smooth, y_smooth, color=confirm_prob_color[index], label=Param.confirm_prob)
+            plt.xlabel("ticket_time_limit")
+            plt.ylabel("revenue")
+        plt.legend()
         plt.savefig("assets/pictures/result.png")
 
         

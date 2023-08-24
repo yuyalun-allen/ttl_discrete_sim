@@ -13,25 +13,38 @@ class Flight:
         self.norm_price = 100
         self.ticket_price = self.norm_price
         self.total_revenue = 0
+        self.confirm_revenue = 0
+        self.hold_up_revenue = 0
+        self.expected_revenue = 0
         self.log = log
     
 
     # Define the revenue management function for each flight
     def revenue_management(self):
         new_price = self.norm_price
+        increase_rate = 1
         while True:
             yield self.env.timeout(Param.freq_set_price)       # the time frequency for updating ticket price
             if self.bookings < self.num_seats:
                 # increase the price if fewer seats are available
-                if self.num_seats - self.bookings <= 20:
-                    price = self.norm_price * 1.2
-                elif self.num_seats - self.bookings <= 50:
-                    price = self.norm_price * 1.1
-                else:
-                    price = self.norm_price
+                # if self.num_seats - self.bookings <= 20:
+                #     price = self.norm_price * 1.2
+                # elif self.num_seats - self.bookings <= 50:
+                #     price = self.norm_price * 1.1
+                # else:
+                #     price = self.norm_price
+                
+                # increase the price when days going on
+                if self.env.now % 7 == 0:
+                    increase_rate += 0.02
+                price = self.norm_price * increase_rate  
+
 
                 # calculate the expected revenue for the remaining capacity
-                expected_revenue = (self.num_seats - self.bookings) * price
+                if self.env.now == 365:
+                    expected_revenue = 0
+                else:
+                    expected_revenue = (self.num_seats - self.bookings) * price
 
                 # if the expected revenue is higher than the current revenue,
                 # update the price and revenue
