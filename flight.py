@@ -104,13 +104,13 @@ class Flight:
             decision = np.random.random() 
             if decision <= Param.confirm_prob:
                 try:
-                    ttl.interrupt(cause="cancel")
+                    ttl.interrupt(cause="confirm")
                     interrupted = True
                 except RuntimeError:
                     timeout = True
             elif decision > Param.confirm_prob and decision <= Param.confirm_prob + Param.cancel_prob:
                 try:
-                    ttl.interrupt(cause="confirm")
+                    ttl.interrupt(cause="cancel")
                     interrupted = True
                 except RuntimeError:
                     timeout = True
