@@ -72,7 +72,6 @@ class Flight:
         try:
             yield self.env.timeout(Param.ticket_time_limit)
             self.bookings -= 1
-            # TODO: price may change.
             self.revenue_hold_on -= booking_price
             if self.log == "DEBUG":
                 print(f"Passenger of flight {self.id} "
