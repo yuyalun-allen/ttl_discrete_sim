@@ -12,50 +12,34 @@ class Flight:
         self.num_seats = 100  # TODO: the detailed info of each flight could be loaded from an input file
         self.norm_price = 100
         self.ticket_price = self.norm_price
-        self.total_revenue = 0
-        self.confirm_revenue = 0
-        self.hold_up_revenue = 0
-        self.expected_revenue = 0
         self.log = log
+        
+        self.revenue_confirmed = 0
+        self.revenue_hold_on = 0
     
 
     # Define the revenue management function for each flight
     def revenue_management(self):
         new_price = self.norm_price
-        increase_rate = 1
+        price_increase_rate = 0
+        resale_rate = Param.resale_prob
         while True:
             yield self.env.timeout(Param.freq_set_price)       # the time frequency for updating ticket price
+            if resale_rate > 0.05:
+                resale_rate -= 0.01
             if self.bookings < self.num_seats:
-                # increase the price if fewer seats are available
-                # if self.num_seats - self.bookings <= 20:
-                #     price = self.norm_price * 1.2
-                # elif self.num_seats - self.bookings <= 50:
-                #     price = self.norm_price * 1.1
-                # else:
-                #     price = self.norm_price
-                
-                # increase the price when days going on
+                # increase the price when days are going on
                 if self.env.now % 7 == 0:
-                    increase_rate += 0.02
-                price = self.norm_price * increase_rate  
+                    price_increase_rate += 0.05
+                new_price = self.norm_price * (1 + price_increase_rate)
 
-
-                # calculate the expected revenue for the remaining capacity
-                if self.env.now == 365:
-                    expected_revenue = 0
-                else:
-                    expected_revenue = (self.num_seats - self.bookings) * price
-
-                # if the expected revenue is higher than the current revenue,
-                # update the price and revenue
-                if expected_revenue + self.total_revenue > self.revenue:
-                    # TODO: check this!
-                    self.revenue = expected_revenue + self.total_revenue
-                    new_price = price
+                revenue_expectation = self.revenue_confirmed + self.revenue_hold_on * Param.confirm_prob + self.revenue_hold_on * Param.cancel_prob * resale_rate + self.revenue_hold_on * (1 - Param.confirm_prob - Param.cancel_prob) * (resale_rate - 0.01)
+                if revenue_expectation > self.revenue:
+                    self.revenue = revenue_expectation 
             else:
                 new_price = 0  # no more bookings allowed
-            self.ticket_price = new_price
             # update the ticket price
+            self.ticket_price = new_price
             if self.log == "DEBUG":
                 print(f"Day {self.env.now} {self.id} ticket price: {self.ticket_price:.2f}, "
                     f"remaining {self.num_seats - self.bookings} seats.")
@@ -64,19 +48,19 @@ class Flight:
     def passenger_arrivals(self):
         while True:
             yield self.env.timeout(int(np.random.exponential(scale=Param.pax_inter_time)))
+            booking_price = self.ticket_price
             if self.log == "DEBUG":
                 print(f"Passenger of flight {self.id} arrived at day {self.env.now} ")
             if self.bookings < self.num_seats:
                 self.bookings += 1
-                self.total_revenue += self.ticket_price
+                self.revenue_hold_on += booking_price
                 if self.log == "DEBUG":
                     print(f"Passenger of flight {self.id} "
                         f"arrived at day {self.env.now} "
                         f"purchased a ticket at price {self.ticket_price:.2f}, "
                         f"remaining {self.num_seats - self.bookings} seats.")
                 # Start TTL timing
-                start = self.env.now
-                ttl = self.env.process(self.ticket_time_limit())
+                ttl = self.env.process(self.ticket_time_limit(booking_price))
                 # Allow decision
                 self.env.process(self.decide_booking(ttl))
             else:
@@ -84,12 +68,12 @@ class Flight:
                     print(f"Passenger of flight {self.id} arrived at day {self.env.now} finds no available seats.")
 
     # Handle ttl
-    def ticket_time_limit(self):
+    def ticket_time_limit(self, booking_price):
         try:
             yield self.env.timeout(Param.ticket_time_limit)
             self.bookings -= 1
             # TODO: price may change.
-            self.total_revenue -= self.ticket_price
+            self.revenue_hold_on -= booking_price
             if self.log == "DEBUG":
                 print(f"Passenger of flight {self.id} "
                     f"automatically cancelled at day {self.env.now} "
@@ -99,12 +83,15 @@ class Flight:
             cause = interrupt.cause
             if cause == "cancel":
                 self.bookings -= 1
-                self.total_revenue -= self.ticket_price
-                print(f"Passenger of flight {self.id} "
-                    f"cancelled at day {self.env.now} "
-                    f"return a ticket at price {self.ticket_price:.2f}, "
-                    f"remaining {self.num_seats - self.bookings} seats.")
+                self.revenue_hold_on -= booking_price
+                if self.log == "DEBUG":
+                    print(f"Passenger of flight {self.id} "
+                        f"cancelled at day {self.env.now} "
+                        f"return a ticket at price {self.ticket_price:.2f}, "
+                        f"remaining {self.num_seats - self.bookings} seats.")
             elif cause == "confirm":
+                self.revenue_hold_on -= booking_price
+                self.revenue_confirmed += booking_price
                 if self.log == "DEBUG":
                     print(f"Passenger of flight {self.id} "
                         f"confirmed at day {self.env.now} ")
