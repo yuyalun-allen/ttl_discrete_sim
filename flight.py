@@ -22,20 +22,20 @@ class Flight:
     def revenue_management(self):
         new_price = self.norm_price
         price_increase_rate = 0
-        resale_rate = Param.resale_prob
+        # resale_rate = Param.resale_prob
         while True:
             yield self.env.timeout(Param.freq_set_price)       # the time frequency for updating ticket price
-            if resale_rate > 0.05:
-                resale_rate -= 0.01
+            # if resale_rate > 0.05:
+            #     resale_rate -= 0.01
             if self.bookings < self.num_seats:
                 # increase the price when days are going on
                 if self.env.now % 7 == 0:
                     price_increase_rate += 0.05
                 new_price = self.norm_price * (1 + price_increase_rate)
 
-                revenue_expectation = self.revenue_confirmed + self.revenue_hold_on * Param.confirm_prob + self.revenue_hold_on * Param.cancel_prob * resale_rate + self.revenue_hold_on * (1 - Param.confirm_prob - Param.cancel_prob) * (resale_rate - 0.01)
-                if revenue_expectation > self.revenue:
-                    self.revenue = revenue_expectation 
+                # revenue_expectation = self.revenue_confirmed + self.revenue_hold_on * Param.confirm_prob + self.revenue_hold_on * Param.cancel_prob * resale_rate + self.revenue_hold_on * (1 - Param.confirm_prob - Param.cancel_prob) * (resale_rate - 0.01)
+                # if revenue_expectation > self.revenue:
+                #     self.revenue = revenue_expectation 
             else:
                 new_price = 0  # no more bookings allowed
             # update the ticket price

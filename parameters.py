@@ -8,4 +8,4 @@ class Parameter:
     confirm_prob = 0.5
     cancel_prob = 0.3    
 
-    resale_prob = 0.9
+    # resale_prob = 0.9
