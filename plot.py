@@ -32,5 +32,23 @@ class AirlineRmPlotting:
         plt.legend()
         plt.savefig("assets/pictures/result.png")
 
-        
 
+    def plot_day_to_booking_revenue(routes):
+        confirm_prob_range = [0.02, 0.03, 0.2, 0.4, 0.6]
+        confirm_prob_color = ["black", "green", "red", "blue", "yellow"]
+        for index in range(len(confirm_prob_color)):
+            Param.confirm_prob = confirm_prob_range[index]
+            simulation = Sim(routes, "INFO")
+            simulation.run(num_days=Param.num_days)
+            revenues = np.zeros(20)
+            for f in simulation.flights.values():
+                revenues += np.array(f.day_to_booking_revenue)
+            spl = make_interp_spline(np.arange(1, 21, 1), revenues, k=2)
+            x_smooth = np.linspace(1, 20, 300)
+            y_smooth = spl(x_smooth)
+            
+            plt.plot(x_smooth, y_smooth, color=confirm_prob_color[index], label=Param.confirm_prob)
+            plt.xlabel("day_to_booking")
+            plt.ylabel("revenue")
+        plt.legend()
+        plt.savefig("assets/pictures/optimal_result.png")

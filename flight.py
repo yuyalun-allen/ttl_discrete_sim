@@ -16,6 +16,7 @@ class Flight:
         
         self.revenue_confirmed = 0
         self.revenue_hold_on = 0
+        self.day_to_booking_revenue = [0 for _ in range(20)]
     
 
     # Define the revenue management function for each flight
@@ -59,8 +60,9 @@ class Flight:
                         f"arrived at day {self.env.now} "
                         f"purchased a ticket at price {self.ticket_price:.2f}, "
                         f"remaining {self.num_seats - self.bookings} seats.")
+                start = self.env.now
                 # Start TTL timing
-                ttl = self.env.process(self.ticket_time_limit(booking_price))
+                ttl = self.env.process(self.ticket_time_limit(booking_price, start))
                 # Allow decision
                 self.env.process(self.decide_booking(ttl))
             else:
@@ -68,7 +70,7 @@ class Flight:
                     print(f"Passenger of flight {self.id} arrived at day {self.env.now} finds no available seats.")
 
     # Handle ttl
-    def ticket_time_limit(self, booking_price):
+    def ticket_time_limit(self, booking_price, start):
         try:
             yield self.env.timeout(Param.ticket_time_limit)
             self.bookings -= 1
@@ -91,6 +93,7 @@ class Flight:
             elif cause == "confirm":
                 self.revenue_hold_on -= booking_price
                 self.revenue_confirmed += booking_price
+                self.day_to_booking_revenue[self.env.now - start] += booking_price
                 if self.log == "DEBUG":
                     print(f"Passenger of flight {self.id} "
                         f"confirmed at day {self.env.now} ")

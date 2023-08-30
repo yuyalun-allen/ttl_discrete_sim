@@ -6,7 +6,7 @@ from plot import AirlineRmPlotting
 def main():
     # routes = [('NYC', 'LAX'), ('LAX', 'NYC'), ('NYC', 'MIA'), ('MIA', 'NYC')]
     routes = [('NYC', 'LAX')]  # for a single flight
-    AirlineRmPlotting.plot_ttl_revenue(routes)
+    AirlineRmPlotting.plot_day_to_booking_revenue(routes)
 
 if __name__ == "__main__":
     main()
