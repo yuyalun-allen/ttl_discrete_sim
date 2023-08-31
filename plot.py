@@ -13,7 +13,7 @@ class AirlineRmPlotting:
             Param.confirm_prob = confirm_prob_range[index]
             revenues = list()
             # Simulate with different ttl
-            for i in np.arange(1, 7.5, 0.5):
+            for i in np.arange(0, 7.5, 0.5):
                 Param.ticket_time_limit = i
                 simulation = Sim(routes, "INFO")
                 simulation.run(num_days=Param.num_days)
@@ -22,8 +22,8 @@ class AirlineRmPlotting:
                     revenue += f.revenue_confirmed
                 revenues.append(revenue)
             # Make the curve more smooth
-            spl = make_interp_spline(np.arange(1, 7.5, 0.5), revenues, k=2)
-            x_smooth = np.linspace(1, 7, 300)
+            spl = make_interp_spline(np.arange(0, 7.5, 0.5), revenues, k=2)
+            x_smooth = np.linspace(0, 7, 300)
             y_smooth = spl(x_smooth)
             
             plt.plot(x_smooth, y_smooth, color=confirm_prob_color[index], label=Param.confirm_prob)

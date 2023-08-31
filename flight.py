@@ -100,7 +100,6 @@ class Flight:
         interrupted = False
         timeout = False
         while not timeout and not interrupted:
-            yield self.env.timeout(Param.decision_inter_time)
             decision = np.random.random() 
             if decision <= Param.confirm_prob:
                 try:
@@ -114,3 +113,4 @@ class Flight:
                     interrupted = True
                 except RuntimeError:
                     timeout = True
+            yield self.env.timeout(Param.decision_inter_time)
