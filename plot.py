@@ -5,7 +5,7 @@ from simulator import  AirlineRmSimulation as Sim
 from scipy.interpolate import make_interp_spline
 
 class AirlineRmPlotting:
-    def plot_ttl_revenue(routes):
+    def plot_ttl_revenue(routes, seats_info):
         confirm_prob_range = [0.02, 0.03, 0.2, 0.4, 0.6]
         confirm_prob_color = ["black", "green", "red", "blue", "yellow"]
         # Simulate with different confirm prob
@@ -15,7 +15,7 @@ class AirlineRmPlotting:
             # Simulate with different ttl
             for i in np.arange(0, 7.5, 0.5):
                 Param.ticket_time_limit = i
-                simulation = Sim(routes, "INFO")
+                simulation = Sim(routes, "INFO", seats_info)
                 simulation.run(num_days=Param.num_days)
                 revenue = 0
                 for f in simulation.flights.values():

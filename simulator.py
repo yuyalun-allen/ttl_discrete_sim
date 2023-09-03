@@ -3,13 +3,16 @@ from flight import Flight
 
 
 class AirlineRmSimulation:
-    def __init__(self, routes, log):
+    def __init__(self, routes, log, seats_info):
         self.env = simpy.Environment()
         self.routes = routes
         self.flights = {}
         self.log = log
-        for origin, destination in routes:
-            self.flights[(origin, destination)] = Flight(self.env, flight_id=(origin, destination), log=self.log)
+        assert(len(routes) == len(seats_info), "routes must match their seats information")
+        for i in range(len(routes)):
+            self.flights[routes[i]] = Flight(self.env, flight_id=routes[i], log=self.log, 
+                                                         total_seats=seats_info[i]["total_seats"], ratio_of_seat_classes=seats_info[i]["ratio_of_seat_classes"], 
+                                                         norm_prices=seats_info[i]["norm_prices"])
 
     def run(self, num_days):
         for flight in self.flights.values():
