@@ -9,7 +9,7 @@ class Parameter:
     cancel_prob = 0.3    
 
     num_total_seats = 100
-    preference_of_seat_classes = [0.8, 0.15, 0.15]
+    preference_of_seat_classes = [0.8, 0.15, 0.05]
 
 
     # resale_prob = 0.9
