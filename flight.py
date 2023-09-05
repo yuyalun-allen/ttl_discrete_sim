@@ -16,6 +16,7 @@ class Flight:
         
         self.revenue_confirmed = 0
         self.revenue_hold_on = 0
+        self.revenue_expected = 0
     
 
     # Define the revenue management function for each flight
@@ -46,9 +47,14 @@ class Flight:
 
     # Define the function to simulate passenger bookings
     def passenger_arrivals(self):
+        change_rate = (0.9 - 0.1) / 365
         while True:
             yield self.env.timeout(int(np.random.exponential(scale=Param.pax_inter_time)))
             booking_price = self.ticket_price
+            resale_prob = 0.9 - change_rate * self.env.now
+            decision_prob = 0.9 - change_rate * self.env.now
+            ticket_revenue_expectation = booking_price * ((1 - Param.confirm_prob) * resale_prob * decision_prob + Param.confirm_prob * decision_prob + resale_prob + (1 - decision_prob))
+            self.revenue_expected += ticket_revenue_expectation
             if self.log == "DEBUG":
                 print(f"Passenger of flight {self.id} arrived at day {self.env.now} ")
             if self.bookings < self.num_seats:
@@ -60,7 +66,7 @@ class Flight:
                         f"purchased a ticket at price {self.ticket_price:.2f}, "
                         f"remaining {self.num_seats - self.bookings} seats.")
                 # Start TTL timing
-                ttl = self.env.process(self.ticket_time_limit(booking_price))
+                ttl = self.env.process(self.ticket_time_limit(booking_price, ticket_revenue_expectation))
                 # Allow decision
                 self.env.process(self.decide_booking(ttl))
             else:
@@ -68,11 +74,12 @@ class Flight:
                     print(f"Passenger of flight {self.id} arrived at day {self.env.now} finds no available seats.")
 
     # Handle ttl
-    def ticket_time_limit(self, booking_price):
+    def ticket_time_limit(self, booking_price, ticket_revenue_expectation):
         try:
             yield self.env.timeout(Param.ticket_time_limit)
             self.bookings -= 1
             self.revenue_hold_on -= booking_price
+            self.revenue_expected -= ticket_revenue_expectation
             if self.log == "DEBUG":
                 print(f"Passenger of flight {self.id} "
                     f"automatically cancelled at day {self.env.now} "
@@ -83,6 +90,7 @@ class Flight:
             if cause == "cancel":
                 self.bookings -= 1
                 self.revenue_hold_on -= booking_price
+                self.revenue_expected -= ticket_revenue_expectation
                 if self.log == "DEBUG":
                     print(f"Passenger of flight {self.id} "
                         f"cancelled at day {self.env.now} "
