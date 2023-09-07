@@ -6,7 +6,7 @@ from scipy.interpolate import make_interp_spline
 
 class AirlineRmPlotting:
     def plot_ttl_revenue(routes):
-        confirm_prob_range = [0.02, 0.03, 0.2, 0.4, 0.6]
+        confirm_prob_range = [0, 0.2, 0.4, 0.6, 1]
         confirm_prob_color = ["black", "green", "red", "blue", "yellow"]
         # Simulate with different confirm prob
         for index in range(len(confirm_prob_color)):
@@ -19,7 +19,7 @@ class AirlineRmPlotting:
                 simulation.run(num_days=Param.num_days)
                 revenue = 0
                 for f in simulation.flights.values():
-                    revenue += f.revenue_confirmed
+                    revenue += f.revenue_expected
                 revenues.append(revenue)
             # Make the curve more smooth
             spl = make_interp_spline(np.arange(0, 60.5, 0.5), revenues, k=2)

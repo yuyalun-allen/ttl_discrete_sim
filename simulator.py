@@ -23,6 +23,7 @@ class AirlineRmSimulation:
             flight = self.flights[(origin, destination)]
             print(f"From {origin} to {destination}:")
             print(f"Total revenue: ${flight.revenue_confirmed:.2f}")
+            print(f"Expected revenue: ${flight.revenue_expected:.2f}")
             print(f"Total seats sold: {flight.bookings}")
             print()
 
