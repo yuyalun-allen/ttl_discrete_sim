@@ -52,7 +52,7 @@ class Flight:
             if Param.ticket_time_limit != 0:
                 yield self.env.timeout(np.random.exponential(scale=Param.pax_inter_time / Param.ticket_time_limit))
             else:
-                yield self.env.timeout(np.random.exponential(scale=Param.pax_inter_time))
+                yield self.env.timeout(np.random.exponential(scale=4 * Param.pax_inter_time))
             booking_price = self.ticket_price
             resale_prob = 0.9 - change_rate * self.env.now
             decision_prob = 0.9 - change_rate * self.env.now
