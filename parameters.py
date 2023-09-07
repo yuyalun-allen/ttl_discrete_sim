@@ -1,11 +1,9 @@
 class Parameter:
     num_days = 365  # Number of days to simulate
-    pax_inter_time = 1
+    pax_inter_time = 0.5
     decision_inter_time = 0.25
     freq_set_price = 0.5
     ticket_time_limit = 7
 
     confirm_prob = 0.5
-    cancel_prob = 0.3    
-
-    # resale_prob = 0.9
+    cancel_prob = 0.2    

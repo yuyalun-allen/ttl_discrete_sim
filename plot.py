@@ -9,6 +9,8 @@ class AirlineRmPlotting:
         confirm_prob_range = [0.2, 0.4, 0.6, 0.8, 1]
         confirm_prob_color = ["grey", "green", "red", "blue", "orange"]
         # Simulate with different confirm prob
+        plt.figure(dpi=400)
+        plt.ylim(0, 25000)
         for index in range(len(confirm_prob_color)):
             Param.confirm_prob = confirm_prob_range[index]
             revenues = list()
@@ -32,5 +34,30 @@ class AirlineRmPlotting:
         plt.legend()
         plt.savefig("assets/pictures/result.png")
 
-        
+    def plot_exponential_distribution(lmbda):
+        x = np.linspace(0, 10, 100)
+        pdf = lmbda * np.exp(-lmbda * x)
 
+        plt.figure(dpi=400)
+        plt.plot(x, pdf, label=f'λ = {lmbda}', color='blue')
+
+        plt.xlabel('Days')
+        plt.ylabel('Probability Density')
+        plt.legend()
+
+        plt.savefig("assets/pictures/exponential_dist.png")
+
+    def plot_price_change():
+        y_initial = 100
+        x_interval = 7
+        y_increment = 5
+        x = np.arange(0, 50, x_interval)
+        y = [y_initial + i * y_increment for i in range(len(x))]
+
+        plt.figure(dpi=400)
+        plt.step(x, y, where='post', color='b')
+
+        plt.xlabel('Days')
+        plt.ylabel('Ticket Price')
+
+        plt.savefig("assets/pictures/ticket_price.png")
