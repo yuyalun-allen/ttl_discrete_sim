@@ -47,7 +47,10 @@ class Flight:
     # Define the function to simulate passenger bookings
     def passenger_arrivals(self):
         while True:
-            yield self.env.timeout(int(np.random.exponential(scale=Param.pax_inter_time)))
+            if Param.ticket_time_limit != 0:
+                yield self.env.timeout(np.random.exponential(scale=Param.pax_inter_time / Param.ticket_time_limit))
+            else:
+                yield self.env.timeout(np.random.exponential(scale=Param.pax_inter_time))
             booking_price = self.ticket_price
             if self.log == "DEBUG":
                 print(f"Passenger of flight {self.id} arrived at day {self.env.now} ")
@@ -70,7 +73,7 @@ class Flight:
     # Handle ttl
     def ticket_time_limit(self, booking_price):
         try:
-            yield self.env.timeout(Param.ticket_time_limit)
+            yield self.env.timeout(np.random.exponential(scale=Param.decision_inter_time))
             self.bookings -= 1
             self.revenue_hold_on -= booking_price
             if self.log == "DEBUG":
