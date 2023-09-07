@@ -53,7 +53,7 @@ class Flight:
             booking_price = self.ticket_price
             resale_prob = 0.9 - change_rate * self.env.now
             decision_prob = 0.9 - change_rate * self.env.now
-            ticket_revenue_expectation = booking_price * ((1 - Param.confirm_prob) * resale_prob * decision_prob + Param.confirm_prob * decision_prob + resale_prob + (1 - decision_prob))
+            ticket_revenue_expectation = booking_price * ((1 - Param.confirm_prob) * resale_prob * decision_prob + Param.confirm_prob * decision_prob + resale_prob * (1 - decision_prob))
             self.revenue_expected += ticket_revenue_expectation
             if self.log == "DEBUG":
                 print(f"Passenger of flight {self.id} arrived at day {self.env.now} ")
