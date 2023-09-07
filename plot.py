@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib
 from parameters import Parameter as Param
 from simulator import  AirlineRmSimulation as Sim
 from scipy.interpolate import make_interp_spline
 
 class AirlineRmPlotting:
     def plot_ttl_revenue(routes):
+        matplotlib.rcParams['font.family'] = 'Arial'
         confirm_prob_range = [0.2, 0.4, 0.6, 0.8, 1]
         confirm_prob_color = ["grey", "green", "red", "blue", "orange"]
         # Simulate with different confirm prob
@@ -35,6 +37,7 @@ class AirlineRmPlotting:
         plt.savefig("assets/pictures/result.png")
 
     def plot_exponential_distribution(lmbda):
+        matplotlib.rcParams['font.family'] = 'Arial'
         x = np.linspace(0, 10, 100)
         pdf = lmbda * np.exp(-lmbda * x)
 
@@ -48,6 +51,7 @@ class AirlineRmPlotting:
         plt.savefig("assets/pictures/exponential_dist.png")
 
     def plot_price_change():
+        matplotlib.rcParams['font.family'] = 'Arial'
         y_initial = 100
         x_interval = 7
         y_increment = 5

@@ -9,4 +9,4 @@ def main():
     AirlineRmPlotting.plot_ttl_revenue(routes)
 
 if __name__ == "__main__":
-    AirlineRmPlotting.plot_price_change()
+    AirlineRmPlotting.plot_exponential_distribution(4)
