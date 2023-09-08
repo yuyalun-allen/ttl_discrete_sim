@@ -8,8 +8,9 @@ from scipy.interpolate import make_interp_spline
 class AirlineRmPlotting:
     def plot_ttl_revenue(routes):
         matplotlib.rcParams['font.family'] = 'Arial'
-        confirm_prob_range = [0.2, 0.4, 0.6, 0.8, 1]
-        confirm_prob_color = ["grey", "green", "red", "blue", "orange"]
+        confirm_prob_range = [0.2, 0.4, 0.6, 0.8]
+        confirm_prob_color = ["grey", "green", "red", "blue"]
+        confirm_prob_line = ["-", "--", ":", "-."]
         # Simulate with different confirm prob
         plt.figure(dpi=400)
         plt.ylim(0, 25000)
@@ -30,7 +31,7 @@ class AirlineRmPlotting:
             x_smooth = np.linspace(0, 14, 300)
             y_smooth = spl(x_smooth)
             
-            plt.plot(x_smooth, y_smooth, color=confirm_prob_color[index], label=Param.confirm_prob)
+            plt.plot(x_smooth, y_smooth, linestyle=confirm_prob_line[index], color=confirm_prob_color[index], label=Param.confirm_prob)
             plt.xlabel("ticket_time_limit")
             plt.ylabel("revenue")
         plt.legend()
